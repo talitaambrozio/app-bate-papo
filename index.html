@@ -30,6 +30,8 @@
     $(() => {
         $("#send").click(()=>{
             sendMessage({name: $("#name").val(), message: $("#message").val()});
+            $("#name").val('');
+            $("#message").val('');
         })
 
         getMessages()

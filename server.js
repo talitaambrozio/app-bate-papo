@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: false }))
 var Message = mongoose.model('Message', {
   name: String,
   message: String
+
 })
 
 var dbUrl = process.env.DB_URL;
