@@ -12,7 +12,8 @@ app.use(express.urlencoded({ extended: false }))
 
 var Message = mongoose.model('Message', {
   name: String,
-  message: String
+  message: String,
+  dateTime: { type: Date, default: Date.now }
 
 })
 
@@ -34,8 +35,10 @@ app.get('/messages', async (req, res) => {
 app.post('/messages', async (req, res) => {
   var message = new Message(req.body);
   try {
+    message.dateTime = new Date();
+
     const newMessage = await message.save();
-    io.emit('message', req.body);
+    io.emit('message', newMessage);
     res.sendStatus(200);
   } catch (err) {
     console.error(err);

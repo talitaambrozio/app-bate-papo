@@ -40,7 +40,14 @@
     socket.on('message', addMessages)
 
     function addMessages(message){
-        $("#messages").append(`<h4> ${message.name} </h4> <p> ${message.message} </p>`)
+      const dateTime = new Date(message.dateTime);
+      const formatteddateTime = dateTime.toLocaleDateString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+      });
+        $("#messages").prepend(`<h4> ${message.name} </h4> <p> ${message.message} </p>
+        <small> ${formatteddateTime} </small><hr>`)
     }
 
     function getMessages(){
