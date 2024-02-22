@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css"
+    integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+    integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+    crossorigin="anonymous"></script>
+    <style>
+      .gif-item {
+
+          margin-right: 10px; 
+          cursor: pointer; 
+      }
+  
+      .gif-item.selected {
+          border: 2px solid green;
+          padding: 5px; 
+      }
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <br>
+    <div class="jumbotron">
+      <h1 class="display-4">Send Message</h1>
+      <br>
+      <input id="name" class="form-control" placeholder="Name">
+      <br>
+      <textarea id="message" class="form-control" placeholder="Your Message Here"></textarea>
+      <br>
+      <div class="input-group mb-3">
+        <input id="gifSearch" type="text" class="form-control" placeholder="Search for GIFs">
+        <button id="searchBtn" class="btn btn-outline-secondary" type="button">Search</button>
+      </div>
+
+      <div id="gifResults"></div>
+      <br>
+      <button id="send" class="btn btn-success">Send</button>
+    </div>
+    <div id="messages">
+
+    </div>
+  </div>
+  <script>
+    let socket = io();
+    let selectedGifUrl = '';
+    $(() => {
+      $("#send").click(() => {
+        sendMessage({
+          name: $("#name").val(),
+          message: $("#message").val(),
+          gifUrl: $("#gifUrl").val()
+        });
+        $("#name").val('');
+        $("#message").val('');
+        $("#gifUrl").val('');
+      });
+
+      $("#searchBtn").click(() => {
+        searchGif($("#gifSearch").val());
+      });
+
+      getMessages()
+    })
+
+    socket.on('message', addMessages)
+
+    function addMessages(message) {
+      const dateTime = new Date(message.dateTime);
+      const formatteddateTime = dateTime.toLocaleDateString('en-US', {
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true
+      });
+      let messageContent = `<h4> ${message.name} </h4> <p> ${message.message} </p> <br> <small> ${formatteddateTime} </small> <hr>`;
+
+      if(message.gifUrl){
+        messageContent = `<h4> ${message.name} </h4> <p> ${message.message} </p> <img src="${message.gifUrl}" alt="GIF"> <br> <small> ${formatteddateTime} </small> <hr>`;
+
+      }
+      $("#messages").prepend(messageContent);
+
+    }
+
+    function getMessages() {
+      $.get('http://localhost:3000/messages', (data) => {
+        data.forEach(addMessages);
+      })
+    }
+
+    function sendMessage(message) {
+      if (!message.name || !message.message) {
+        console.error('The name and message fields are mandatory!')
+        return;
+      }
+      message.gifUrl = selectedGifUrl;
+      $.post('http://localhost:3000/messages', message)
+        .done(() => {
+          console.log('Message sent successfully!');
+          $("#name").val('');
+          $("#message").val('');
+          $("#gifUrl").val('');
+          selectedGifUrl = '';
+          $("#gifResults").empty();
+          $("#gifSearch").val('');
+        })
+        .fail((error) => {
+          console.error('error sending the message.', error);
+        });
+    }
+
+    function searchGif(query) {
+      const url = `https://api.giphy.com/v1/gifs/search?q=${query}&api_key=<%= apiKey %>&limit=5`;
+
+      $.get(url, (data) => {
+        $("#gifResults").empty();
+        data.data.forEach((gif) => {
+          const $gif = $(`<img src="${gif.images.fixed_height.url}" alt="GIF">`);
+
+          $gif.addClass('gif-item');
+
+          $gif.click(function() {
+                $('.gif-item').removeClass('selected');
+                $(this).addClass('selected');
+                selectedGifUrl = $(this).attr('src');
+                console.log(selectedGifUrl);
+            });
+            $("#gifResults").append($gif);
+        });
+      });
+      $("#gifResults").on("click", ".gif", function () {
+        selectedGifUrl = $(this).attr('src');
+        console.log(selectedGifUrl);
+      });
+    }
+  </script>
+</body>
+
+</html>

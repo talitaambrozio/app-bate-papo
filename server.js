@@ -5,19 +5,27 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 require('dotenv').config();
+const ejs = require('ejs');
 
+app.set('view engine', 'ejs');
 app.use(express.static(__dirname));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: false })); 
+
+var dbUrl = process.env.DB_URL;
+var apiKey = process.env.API_KEY;
+
+app.get('/', (req, res) => {
+  res.render('index', { apiKey: apiKey });
+});
 
 var Message = mongoose.model('Message', {
   name: String,
   message: String,
-  dateTime: { type: Date, default: Date.now }
+  dateTime: { type: Date, default: Date.now },
+  gifUrl: String
 
-})
-
-var dbUrl = process.env.DB_URL;
+}); 
 
 
 app.get('/messages', async (req, res) => {
