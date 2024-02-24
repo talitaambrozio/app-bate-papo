@@ -32,6 +32,10 @@ jobs:
             -
                 name: Push Docker Image to Docker Hub
                 run: docker push talitaambrozio/app-messages:1.0   
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build
+        steps:            
             -
                 name: Connect to EC2
                 uses: appleboy/ssh-action@master  
