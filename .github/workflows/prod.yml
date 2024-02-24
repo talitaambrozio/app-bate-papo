@@ -44,12 +44,7 @@ jobs:
                       docker pull talitaambrozio/app-messages:1.0
                       docker stop messages || true
                       docker rm messages || true
-                      docker run -d --name messages -p 3000:3000 
-                      -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} 
-                      -e URL=${{ secrets.EC2_HOST }}
-                      talitaambrozio/app-messages:1.0   
-
-
+                      docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:1.0
 
 
                 
