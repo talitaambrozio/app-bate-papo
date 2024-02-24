@@ -15,31 +15,23 @@ jobs:
                 name: Checkout repo
                 uses: actions/checkout@v4 
 
+   
             -
-                name: Configure AWS Credentials
-                uses: aws-actions/configure-aws-credentials@v4
+                name: Login to Docker Hub
+                uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
                 with:
-                    role-to-assume: ${{secrets.ROLE_GITHUB_ACTIONS }}
-                    aws-region: us-east-1    
-            -
-                name: Login to Amazon ECR
-                id: login-ecr
-                uses: aws-actions/amazon-ecr-login@v2
-                with:
-                    registry: us-east-1.amazonaws.com
-                    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                    aws-region: us-east-1   
+                    username: ${{ secrets.USERNAME_DOCKERHUB }}
+                    password: ${{ secrets.PASSWORD_DOCKERHUB }}         
             - 
                 name: Build Docker image
                 run: docker build -t app-messages:latest .
             -
                 name: Tag Docker Image
-                run: docker tag app-messages:latest ${{ secrets.ECR_REPOSITORY }}:1.0
+                run: docker tag app-messages:latest talitaambrozio/app-messages:1.0
     
             -
-                name: Push Docker Image to ECR
-                run: docker push ${{ secrets.ECR_REPOSITORY }}:1.0   
+                name: Push Docker Image to Docker Hub
+                run: docker push talitaambrozio/app-messages:1.0   
             -
                 name: Connect to EC2
                 uses: appleboy/ssh-action@master  
@@ -49,13 +41,13 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: ${{ secrets.EC2_SSH_PORT }}
                     script: |
-                      docker pull ${{ secrets.ECR_REPOSITORY }}:1.0
+                      docker pull talitaambrozio/app-messages:1.0
                       docker stop messages || true
                       docker rm messages || true
                       docker run -d --name messages -p 3000:3000 
                       -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} 
                       -e URL=${{ secrets.EC2_HOST }}
-                      ${{ secrets.ECR_REPOSITORY }}:1.0   
+                      talitaambrozio/app-messages:1.0   
 
 
 
