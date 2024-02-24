@@ -91,7 +91,7 @@
     }
 
     function getMessages() {
-      $.get('<%= url ?>/messages', (data) => {
+      $.get('/messages', (data) => {
         data.forEach(addMessages);
       })
     }
@@ -102,7 +102,7 @@
         return;
       }
       message.gifUrl = selectedGifUrl;
-      $.post('<%= url ?>/messages', message)
+      $.post('/messages', message)
         .done(() => {
           console.log('Message sent successfully!');
           $("#name").val('');

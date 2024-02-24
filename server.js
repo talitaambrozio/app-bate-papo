@@ -17,7 +17,7 @@ var apiKey = process.env.API_KEY;
 var url = process.env.URL;
 
 app.get('/', (req, res) => {
-  res.render('index', { apiKey: apiKey });
+  res.render('index', { apiKey: apiKey, url: url });
 });
 
 var Message = mongoose.model('Message', {
