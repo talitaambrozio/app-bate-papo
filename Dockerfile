@@ -9,6 +9,7 @@ ENV DB_URL=
 ENV API_KEY=
 ENV URL=
 
+
 EXPOSE 3000
 
 CMD ["npm", "start"]
