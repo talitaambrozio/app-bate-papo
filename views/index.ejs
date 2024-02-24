@@ -91,7 +91,7 @@
     }
 
     function getMessages() {
-      $.get('http://localhost:3000/messages', (data) => {
+      $.get('<%= url ?>/messages', (data) => {
         data.forEach(addMessages);
       })
     }
@@ -102,7 +102,7 @@
         return;
       }
       message.gifUrl = selectedGifUrl;
-      $.post('http://localhost:3000/messages', message)
+      $.post('<%= url ?>/messages', message)
         .done(() => {
           console.log('Message sent successfully!');
           $("#name").val('');

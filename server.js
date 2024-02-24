@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 
 var dbUrl = process.env.DB_URL;
 var apiKey = process.env.API_KEY;
+var url = process.env.URL;
 
 app.get('/', (req, res) => {
   res.render('index', { apiKey: apiKey });
