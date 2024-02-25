@@ -21,14 +21,15 @@ jobs:
                 name: Build Docker image
                 run: docker build -t app-messages:latest .
             - 
-                name: Pull Docker image to get latest tag
+                name: Get Last Tag
                 run: |
-                  LAST_TAG=$(docker pull talitaambrozio/app-messages | grep -oP '(?<=1\.)\d+\.\d+')
-                  if [ -z "$LAST_TAG" ]; then
+                    LAST_TAG=$(docker image inspect --format='{{ index .Config.Labels "version" }}' talitaambrozio/app-messages)
+                    if [ -z "$LAST_TAG" ]; then
                     NEXT_TAG="0.1"
-                  else
+                    else
                     NEXT_TAG=$(awk "BEGIN {print $LAST_TAG + 0.1}")
-                  fi
+                    fi
+                    echo "Next Tag: $NEXT_TAG"
             -
                 name: Tag Docker Image
                 run: docker tag app-messages:latest talitaambrozio/app-messages:$NEXT_TAG
