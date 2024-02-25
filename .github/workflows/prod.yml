@@ -16,28 +16,31 @@ jobs:
                 uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
                 with:
                     username: ${{ secrets.USERNAME_DOCKERHUB }}
-                    password: ${{ secrets.PASSWORD_DOCKERHUB }}         
+                    password: ${{ secrets.PASSWORD_DOCKERHUB }}    
+            - 
+                name: Extract metadata (tags, labels) for Docker
+                id: meta
+                uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+                with:
+                    images: talitaambrozio/app-messages 
+            - 
+                name: Get next version
+                uses: reecetech/version-increment@2023.9.3
+                id: version
+                with:
+                      scheme: semver
+                      increment: patch          
             - 
                 name: Build Docker image
-                run: docker build -t app-messages:latest .
-            - 
-                name: Get Last Tag
-                run: |
-                    LAST_TAG=$(docker image inspect --format='{{ index .Config.Labels "version" }}' talitaambrozio/app-messages)
-                    if [ -z "$LAST_TAG" ]; then
-                    NEXT_TAG="0.1"
-                    else
-                    NEXT_TAG=$(awk "BEGIN {print $LAST_TAG + 0.1}")
-                    fi
-                    echo "Next Tag: $NEXT_TAG"
-            -
-                name: Tag Docker Image
-                run: docker tag app-messages:latest talitaambrozio/app-messages:$NEXT_TAG
-    
-            -
-                name: Push Docker Image to Docker Hub
-                run: docker push talitaambrozio/app-messages:$NEXT_TAG 
-            -
+                uses: docker/build-push-action@v2
+                with:
+                    push: true
+                    tags: "talitaambrozio/app-messages:${{ steps.version.outputs.version }}"
+                    context: . 
+    deploy:
+        runs-on: ubuntu-latest
+        steps:        
+            -               
                 name: Connect to EC2
                 uses: appleboy/ssh-action@master  
                 with:
@@ -46,10 +49,10 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: 22
                     script: |
-                      docker pull talitaambrozio/app-messages:$NEXT_TAG
-                      docker stop messages || true
-                      docker rm messages || true
-                      docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:$NEXT_TAG
+                        docker pull talitaambrozio/app-messages:$NEXT_TAG
+                        docker stop messages || true
+                        docker rm messages || true
+                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:$NEXT_TAG
 
 
                 
