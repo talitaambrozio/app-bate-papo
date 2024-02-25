@@ -22,24 +22,14 @@ jobs:
                 id: meta
                 uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
                 with:
-                    images: talitaambrozio/app-messages 
-            - 
-                name: Get next version
-                uses: reecetech/version-increment@2023.9.3
-                id: version
-                with:
-                      scheme: semver
-                      increment: patch          
+                    images: talitaambrozio/app-messages    
             - 
                 name: Build Docker image
                 uses: docker/build-push-action@v2
                 with:
                     push: true
-                    tags: "talitaambrozio/app-messages:${{ steps.version.outputs.version }}"
+                    tags: "talitaambrozio/app-messages:${{ github.sha }}"
                     context: . 
-            - 
-                name: Store version in environment
-                run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
     deploy:
         runs-on: ubuntu-latest
         steps:        
@@ -52,10 +42,10 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: 22
                     script: |
-                        docker pull talitaambrozio/app-messages:${{ secrets.VERSION }}
+                        docker pull talitaambrozio/app-messages:${{ github.sha }}
                         docker stop messages || true
                         docker rm messages || true
-                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:${{ secrets.VERSION }}
+                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:${{ github.sha }}
 
 
                 
