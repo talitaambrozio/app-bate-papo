@@ -49,10 +49,10 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: 22
                     script: |
-                        docker pull talitaambrozio/app-messages:$NEXT_TAG
+                        docker pull talitaambrozio/app-messages:${{ needs.build-and-push-image.outputs.version }}
                         docker stop messages || true
                         docker rm messages || true
-                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:$NEXT_TAG
+                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:${{ needs.build-and-push-image.outputs.version }}
 
 
                 
