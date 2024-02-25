@@ -37,6 +37,9 @@ jobs:
                     push: true
                     tags: "talitaambrozio/app-messages:${{ steps.version.outputs.version }}"
                     context: . 
+            - 
+                name: Store version in environment
+                run: echo "VERSION=${{ steps.version.outputs.version }}" >> $GITHUB_ENV
     deploy:
         runs-on: ubuntu-latest
         steps:        
@@ -49,10 +52,10 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: 22
                     script: |
-                        docker pull talitaambrozio/app-messages:${{ needs.build-and-push-image.outputs.version }}
+                        docker pull talitaambrozio/app-messages:${VERSION}
                         docker stop messages || true
                         docker rm messages || true
-                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:${{ needs.build-and-push-image.outputs.version }}
+                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:${VERSION}
 
 
                 
