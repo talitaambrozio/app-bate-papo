@@ -41,8 +41,7 @@ app.get('/messages', async (req, res) => {
     res.status(500).json({ 'messages': err.message });
   } 
 }); 
-
-
+ 
 app.post('/messages', async (req, res) => {
   const message = new Message(req.body);
   try {
