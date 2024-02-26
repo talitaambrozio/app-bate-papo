@@ -6,10 +6,6 @@ on:
 
 jobs:
     build-and-push-image:
-        permissions:
-            contents: write
-            issues: write
-            pull-requests: write
         runs-on: ubuntu-latest
         steps:
             - 
@@ -27,11 +23,6 @@ jobs:
                 uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
                 with:
                     images: talitaambrozio/app-messages 
-            -
-                run: npx semantic-release
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN}}
-
             - 
                 name: Build Docker image
                 uses: docker/build-push-action@v2
