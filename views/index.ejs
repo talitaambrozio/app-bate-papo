@@ -12,18 +12,18 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
     integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
     crossorigin="anonymous"></script>
-    <style>
-      .gif-item {
+  <style>
+    .gif-item {
 
-          margin-right: 10px; 
-          cursor: pointer; 
-      }
-  
-      .gif-item.selected {
-          border: 2px solid green;
-          padding: 5px; 
-      }
-    </style>
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .gif-item.selected {
+      border: 2px solid green;
+      padding: 5px;
+    }
+  </style>
 </head>
 
 <body>
@@ -36,6 +36,7 @@
       <br>
       <textarea id="message" class="form-control" placeholder="Your Message Here"></textarea>
       <br>
+
       <div class="input-group mb-3">
         <input id="gifSearch" type="text" class="form-control" placeholder="Search for GIFs">
         <button id="searchBtn" class="btn btn-outline-secondary" type="button">Search</button>
@@ -52,6 +53,7 @@
   <script>
     let socket = io();
     let selectedGifUrl = '';
+
     $(() => {
       $("#send").click(() => {
         sendMessage({
@@ -66,7 +68,6 @@
       $("#searchBtn").click(() => {
         searchGif($("#gifSearch").val());
       });
-
       getMessages()
     })
 
@@ -81,12 +82,10 @@
       });
       let messageContent = `<h4> ${message.name} </h4> <p> ${message.message} </p> <br> <small> ${formatteddateTime} </small> <hr>`;
 
-      if(message.gifUrl){
+      if (message.gifUrl) {
         messageContent = `<h4> ${message.name} </h4> <p> ${message.message} </p> <img src="${message.gifUrl}" alt="GIF"> <br> <small> ${formatteddateTime} </small> <hr>`;
-
       }
       $("#messages").prepend(messageContent);
-
     }
 
     function getMessages() {
@@ -100,6 +99,7 @@
         console.error('The name and message fields are mandatory!')
         return;
       }
+
       message.gifUrl = selectedGifUrl;
       $.post('/messages', message)
         .done(() => {
@@ -125,13 +125,13 @@
 
           $gif.addClass('gif-item');
 
-          $gif.click(function() {
-                $('.gif-item').removeClass('selected');
-                $(this).addClass('selected');
-                selectedGifUrl = $(this).attr('src');
-                console.log(selectedGifUrl);
-            });
-            $("#gifResults").append($gif);
+          $gif.click(function () {
+            $('.gif-item').removeClass('selected');
+            $(this).addClass('selected');
+            selectedGifUrl = $(this).attr('src');
+            console.log(selectedGifUrl);
+          });
+          $("#gifResults").append($gif);
         });
       });
       $("#gifResults").on("click", ".gif", function () {
@@ -139,6 +139,8 @@
         console.log(selectedGifUrl);
       });
     }
+
+
   </script>
 </body>
 
