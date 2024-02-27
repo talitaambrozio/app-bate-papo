@@ -5,7 +5,8 @@ var io = require('socket.io')(http);
 var mongoose = require('mongoose');
 require('dotenv').config();
 var ejs = require('ejs');
-var fs = require('fs');
+var filter = require('bad-words');
+filter = new filter();
 
 
 app.set('view engine', 'ejs');
@@ -13,12 +14,9 @@ app.use(express.static(__dirname));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false })); 
 
-
 var dbUrl = process.env.DB_URL;
 var apiKey = process.env.API_KEY;
 var url = process.env.URL;
-var bannedWordsFilePath = 'banned_words.txt';
-var bannedWords = loadBannedWords(bannedWordsFilePath);
 
 app.get('/', (req, res) => {
   res.render('index', { apiKey: apiKey, url: url });
@@ -30,7 +28,6 @@ var Message = mongoose.model('Message', {
   dateTime: { type: Date, default: Date.now },
   gifUrl: String
 });
-
 
 app.get('/messages', async (req, res) => {
   try {
@@ -47,10 +44,11 @@ app.post('/messages', async (req, res) => {
   try {
     message.dateTime = new Date();
   
-    if(containsBadWords(message.message)){
-      message.message = censorMessage(message.message);
+    if(filter.isProfane(message.message)){
+      message.message = filter.clean(message.message);
     }
-     const newMessage = await message.save();
+
+    const newMessage = await message.save();
     io.emit('message', newMessage);
     res.sendStatus(200);
   } catch (err) {
@@ -67,37 +65,6 @@ io.on('connection', () => {
 function connectDatabase() {
   mongoose.connect(dbUrl).then(() => console.log('MongoDB Atlas connected.'))
     .catch((error) => console.log(error));
-}
-
-function containsBadWords(message) {
-  const words = message.split(' ');
-  for (let i = 0; i < words.length; i++) {
-      if (bannedWords.includes(words[i])) {
-          return true;
-      }
-  }
-  return false;
-}
-
-function censorMessage(message){
-  const words = message.split(' ');
-  for(let i = 0; i < words.length; i++){
-    if(bannedWords.includes(words[i])){
-      words[i] = '*****';
-    }
-  }
-  return words.join(' ');
-}
-
-function loadBannedWords(filePath) {
-  try {
-      const data = fs.readFileSync(filePath, 'utf8');
-      const words = data.split('\n').map(word => word.trim());
-      return words.filter(word => word !== ''); 
-  } catch (err) {
-      console.error('Error loading inappropriate words file:', err);
-      return [];
-  }
 }
 
 connectDatabase();

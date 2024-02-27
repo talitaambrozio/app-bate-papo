@@ -27,7 +27,6 @@
 - Clone the repository
 - Install dependencies: 'npm i'
 - Create a '.env' file as specified in the '.env.example' file and set the values for the environment variables
-- Create a 'banned_words.txt' file and define the words you want to ban in chat
 - Run the application with 'npm start'
 
 ### Running the Application with Docker 🐳
