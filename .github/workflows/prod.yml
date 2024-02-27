@@ -51,7 +51,10 @@ jobs:
                     key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
                     port: 22
                     script: |
-                        docker pull talitaambrozio/app-messages:1.0
+                        current_version=$(docker run --rm talitaambrozio/app-messages:metadata cat /metadata.json | jq -r '.["semver-tag"]')
+                        new_version=$(semver bump patch $current_version)
+                        docker pull talitaambrozio/app-messages:latest
+                        docker tag talitaambrozio/app-messages:latest talitaambrozio/app-messages:$new_version
                         docker stop messages || true
                         docker rm messages || true
-                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:1.0             
+                        docker run --name messages -d -e DB_URL=${{ secrets.DB_URL }} -e API_KEY=${{ secrets.API_KEY }} -e URL=${{ secrets.EC2_HOST }} -p 3000:3000 talitaambrozio/app-messages:$new_version            
